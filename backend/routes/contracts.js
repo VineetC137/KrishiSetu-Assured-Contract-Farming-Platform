@@ -8,22 +8,76 @@ const { generateContractPDF } = require('../utils/pdfGenerator');
 
 const router = express.Router();
 
-// Create contract (Farmer only)
-router.post('/create', auth, authorize('farmer'), async (req, res) => {
+// Create contract (Both farmer and buyer)
+router.post('/create', auth, async (req, res) => {
   try {
-    const { cropType, quantity, price, deliveryDate, terms } = req.body;
+    const { 
+      cropType, quantity, unit, price, deliveryDate, terms, category, variety,
+      deliveryLocation, equipmentSupport, qualityParameters, proposedTo
+    } = req.body;
 
-    const contract = new Contract({
-      farmerId: req.user._id,
+    // Process equipment support data
+    const processedEquipmentSupport = {
+      required: equipmentSupport?.required === 'on' || equipmentSupport?.required === true || equipmentSupport?.required === 'true',
+      items: equipmentSupport?.items || [],
+      providedBy: equipmentSupport?.providedBy || 'buyer',
+      cost: equipmentSupport?.cost ? Number(equipmentSupport.cost) : 0,
+      details: equipmentSupport?.details || ''
+    };
+
+    // Process delivery location
+    const processedDeliveryLocation = {
+      address: deliveryLocation?.address || '',
+      city: deliveryLocation?.city || '',
+      state: deliveryLocation?.state || 'Maharashtra',
+      pincode: deliveryLocation?.pincode || ''
+    };
+
+    // Process quality parameters
+    const processedQualityParameters = {
+      specifications: qualityParameters?.specifications || '',
+      gradingCriteria: qualityParameters?.gradingCriteria || '',
+      rejectionCriteria: qualityParameters?.rejectionCriteria || ''
+    };
+
+    const contractData = {
       cropType,
-      quantity,
-      price,
+      category: category || 'crops',
+      variety: variety || '',
+      quantity: Number(quantity),
+      unit: unit || 'kg',
+      price: Number(price),
       deliveryDate: new Date(deliveryDate),
-      terms: terms || 'Standard contract terms and conditions apply.'
-    });
+      deliveryLocation: processedDeliveryLocation,
+      terms: terms || 'Standard contract terms and conditions apply.',
+      proposedBy: req.user.role,
+      equipmentSupport: processedEquipmentSupport,
+      qualityParameters: processedQualityParameters
+    };
 
+    if (req.user.role === 'farmer') {
+      contractData.farmerId = req.user._id;
+      contractData.status = 'Pending'; // Farmer contracts start as Pending
+      if (proposedTo) {
+        contractData.buyerId = proposedTo;
+        contractData.status = 'Negotiating';
+      }
+    } else if (req.user.role === 'buyer') {
+      // Buyer proposals - create as pending for any farmer to accept
+      contractData.buyerId = req.user._id;
+      contractData.status = 'Pending'; // Buyer proposals also start as Pending
+      contractData.proposedBy = 'buyer';
+      if (proposedTo) {
+        contractData.farmerId = proposedTo;
+        contractData.status = 'Negotiating';
+      }
+    }
+
+    const contract = new Contract(contractData);
     await contract.save();
-    await contract.populate('farmerId', 'username email');
+    
+    await contract.populate('farmerId', 'username email ratings');
+    await contract.populate('buyerId', 'username email ratings');
 
     res.status(201).json({
       message: 'Contract created successfully',
@@ -41,14 +95,19 @@ router.get('/my-contracts', auth, async (req, res) => {
     let contracts;
     
     if (req.user.role === 'farmer') {
-      contracts = await Contract.find({ farmerId: req.user._id })
+      contracts = await Contract.find({ 
+        $or: [
+          { farmerId: req.user._id }, // Contracts created by this farmer
+          { farmerId: null, status: 'Pending', proposedBy: 'buyer' } // Buyer proposals available to farmers
+        ]
+      })
         .populate('buyerId', 'username email')
         .sort({ createdAt: -1 });
     } else {
       contracts = await Contract.find({ 
         $or: [
-          { buyerId: req.user._id },
-          { buyerId: null, status: 'Pending' } // Available contracts for buyers
+          { buyerId: req.user._id }, // Contracts owned by this buyer
+          { farmerId: { $exists: true }, status: 'Pending', proposedBy: 'farmer' } // Farmer contracts available to buyers
         ]
       })
         .populate('farmerId', 'username email')
@@ -90,60 +149,98 @@ router.get('/:id', auth, async (req, res) => {
   }
 });
 
-// Sign contract (Buyer only)
-router.post('/sign/:id', auth, authorize('buyer'), async (req, res) => {
+// Digital sign contract
+router.post('/sign/:id', auth, async (req, res) => {
   try {
+    const { signatureData } = req.body;
+    
     const contract = await Contract.findById(req.params.id)
-      .populate('farmerId', 'username email');
+      .populate('farmerId', 'username email')
+      .populate('buyerId', 'username email');
 
     if (!contract) {
       return res.status(404).json({ message: 'Contract not found' });
     }
 
-    if (contract.status !== 'Pending') {
-      return res.status(400).json({ message: 'Contract is not available for signing' });
+    // Check if user is authorized to sign
+    const isFarmer = contract.farmerId._id.toString() === req.user._id.toString();
+    const isBuyer = contract.buyerId ? 
+      contract.buyerId._id.toString() === req.user._id.toString() : 
+      req.user.role === 'buyer'; // Allow any buyer to sign pending contracts
+    
+    if (!isFarmer && !isBuyer) {
+      return res.status(403).json({ message: 'Not authorized to sign this contract' });
     }
 
-    // Check buyer's wallet balance
-    const buyer = await User.findById(req.user._id);
-    const contractValue = contract.quantity * contract.price;
-
-    if (buyer.walletBalance < contractValue) {
-      return res.status(400).json({ message: 'Insufficient wallet balance' });
+    // If buyer is signing a pending contract, assign them to the contract
+    if (req.user.role === 'buyer' && !contract.buyerId) {
+      contract.buyerId = req.user._id;
+      await contract.populate('buyerId', 'username email');
     }
 
-    // Lock funds in buyer's wallet
-    buyer.walletBalance -= contractValue;
-    await buyer.save();
+    // Update digital signature
+    if (isFarmer) {
+      contract.digitalSignatures.farmer = {
+        signed: true,
+        signedAt: new Date(),
+        signatureData: signatureData,
+        ipAddress: req.ip
+      };
+    } else {
+      contract.digitalSignatures.buyer = {
+        signed: true,
+        signedAt: new Date(),
+        signatureData: signatureData,
+        ipAddress: req.ip
+      };
+    }
 
-    // Update contract
-    contract.buyerId = req.user._id;
-    contract.status = 'Signed';
-    contract.signedDate = new Date();
+    // Handle contract status based on who is signing
+    if (isBuyer && contract.status === 'Pending') {
+      // Buyer is purchasing the contract
+      const buyer = await User.findById(req.user._id);
+      const contractValue = contract.quantity * contract.price;
 
-    // Generate PDF contract
-    const pdfPath = await generateContractPDF(contract, buyer, contract.farmerId);
-    contract.contractFile = pdfPath;
+      if (buyer.walletBalance < contractValue) {
+        return res.status(400).json({ message: 'Insufficient wallet balance' });
+      }
+
+      // Lock funds when buyer signs
+      buyer.walletBalance -= contractValue;
+      await buyer.save();
+
+      // Create transaction record
+      const transaction = new Transaction({
+        contractId: contract._id,
+        buyerId: req.user._id,
+        farmerId: contract.farmerId._id,
+        amount: contractValue,
+        type: 'Lock',
+        status: 'Completed',
+        description: `Funds locked for contract ${contract._id}`
+      });
+      await transaction.save();
+
+      contract.status = 'Signed'; // Change status to Signed when buyer purchases
+      contract.signedDate = new Date();
+    }
+
+    // Check if both parties have signed (for future use)
+    const bothSigned = contract.digitalSignatures.farmer.signed && 
+                      contract.digitalSignatures.buyer.signed;
+
+    // Generate PDF contract if both signed
+    if (bothSigned) {
+      const pdfPath = await generateContractPDF(contract, contract.buyerId, contract.farmerId);
+      contract.contractFile = pdfPath;
+    }
 
     await contract.save();
 
-    // Create transaction record
-    const transaction = new Transaction({
-      contractId: contract._id,
-      buyerId: req.user._id,
-      farmerId: contract.farmerId._id,
-      amount: contractValue,
-      type: 'Lock',
-      status: 'Completed',
-      description: `Funds locked for contract ${contract._id}`
-    });
-    await transaction.save();
-
-    await contract.populate('buyerId', 'username email');
-
     res.json({
       message: 'Contract signed successfully',
-      contract
+      contract,
+      bothSigned
     });
   } catch (error) {
     console.error('Sign contract error:', error);

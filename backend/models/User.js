@@ -33,8 +33,29 @@ const userSchema = new mongoose.Schema({
     phone: String,
     address: String,
     farmSize: String, // For farmers
-    businessType: String // For buyers
-  }
+    businessType: String, // For buyers
+    state: String,
+    district: String,
+    pincode: String,
+    profileImage: String
+  },
+  ratings: {
+    average: { type: Number, default: 0 },
+    count: { type: Number, default: 0 },
+    reviews: [{
+      reviewerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      rating: { type: Number, min: 1, max: 5 },
+      comment: String,
+      contractId: { type: mongoose.Schema.Types.ObjectId, ref: 'Contract' },
+      createdAt: { type: Date, default: Date.now }
+    }]
+  },
+  digitalSignature: {
+    signatureImage: String,
+    isVerified: { type: Boolean, default: false }
+  },
+  isOnline: { type: Boolean, default: false },
+  lastSeen: { type: Date, default: Date.now }
 }, {
   timestamps: true
 });

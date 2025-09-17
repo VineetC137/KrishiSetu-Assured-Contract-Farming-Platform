@@ -100,49 +100,66 @@ export default function FarmerDashboard() {
     <Layout title="Farmer Dashboard">
       <div className="space-y-6">
         {/* Welcome Section */}
-        <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg p-6 text-white">
-          <h1 className="text-2xl font-bold mb-2">Welcome back, {user?.username}!</h1>
-          <p className="text-primary-100">Manage your contracts and track your farming progress</p>
+        <div className="bg-gradient-to-r from-primary-500 via-primary-600 to-green-600 rounded-2xl p-8 text-white shadow-2xl animate-slide-up">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold mb-3">🌾 Welcome back, {user?.username}!</h1>
+              <p className="text-primary-100 text-lg">Manage your contracts and track your farming progress</p>
+            </div>
+            <div className="hidden md:block">
+              <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4">
+                <div className="text-4xl">🚜</div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="card">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-bounce-in">
+          <div className="floating-card group">
             <div className="flex items-center">
-              <FileText className="h-8 w-8 text-blue-600" />
+              <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                <FileText className="h-8 w-8 text-white" />
+              </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Contracts</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+                <p className="text-sm font-semibold text-gray-600">Total Contracts</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.total}</p>
               </div>
             </div>
           </div>
 
-          <div className="card">
+          <div className="floating-card group">
             <div className="flex items-center">
-              <Clock className="h-8 w-8 text-yellow-600" />
+              <div className="bg-gradient-to-r from-yellow-500 to-orange-500 p-3 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                <Clock className="h-8 w-8 text-white" />
+              </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Pending</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.pending}</p>
+                <p className="text-sm font-semibold text-gray-600">Pending</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.pending}</p>
               </div>
             </div>
           </div>
 
-          <div className="card">
+          <div className="floating-card group">
             <div className="flex items-center">
-              <CheckCircle className="h-8 w-8 text-green-600" />
+              <div className="bg-gradient-to-r from-green-500 to-green-600 p-3 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                <CheckCircle className="h-8 w-8 text-white" />
+              </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Active</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.signed}</p>
+                <p className="text-sm font-semibold text-gray-600">Active</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.signed}</p>
               </div>
             </div>
           </div>
 
-          <div className="card">
+          <div className="floating-card group">
             <div className="flex items-center">
-              <DollarSign className="h-8 w-8 text-primary-600" />
+              <div className="bg-gradient-to-r from-primary-500 to-primary-600 p-3 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                <DollarSign className="h-8 w-8 text-white" />
+              </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Earnings</p>
-                <p className="text-2xl font-bold text-gray-900">₹{stats.totalEarnings.toLocaleString()}</p>
+                <p className="text-sm font-semibold text-gray-600">Total Earnings</p>
+                <p className="text-3xl font-bold text-gray-900">₹{stats.totalEarnings.toLocaleString()}</p>
               </div>
             </div>
           </div>

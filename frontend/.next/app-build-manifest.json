@@ -16,10 +16,10 @@
       "static/chunks/main-app.js",
       "static/chunks/app/auth/register/page.js"
     ],
-    "/buyer/dashboard/page": [
+    "/auth/login/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/buyer/dashboard/page.js"
+      "static/chunks/app/auth/login/page.js"
     ],
     "/farmer/dashboard/page": [
       "static/chunks/webpack.js",
@@ -36,30 +36,20 @@
       "static/chunks/main-app.js",
       "static/chunks/app/farmer/contracts/page.js"
     ],
-    "/farmer/wallet/page": [
+    "/buyer/dashboard/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/farmer/wallet/page.js"
-    ],
-    "/buyer/contracts/[id]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/buyer/contracts/[id]/page.js"
-    ],
-    "/buyer/wallet/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/buyer/wallet/page.js"
+      "static/chunks/app/buyer/dashboard/page.js"
     ],
     "/buyer/contracts/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/buyer/contracts/page.js"
     ],
-    "/auth/login/page": [
+    "/buyer/contracts/create/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/auth/login/page.js"
+      "static/chunks/app/buyer/contracts/create/page.js"
     ]
   }
 }

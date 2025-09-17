@@ -43,17 +43,28 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  // Handle client-side mounting
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Set up axios defaults
   useEffect(() => {
+    if (!mounted) return;
+    
+    // Don't set base URL, let Next.js rewrites handle it
     const token = Cookies.get('token');
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     }
-  }, []);
+  }, [mounted]);
 
   // Check if user is logged in on mount
   useEffect(() => {
+    if (!mounted) return;
+    
     const checkAuth = async () => {
       const token = Cookies.get('token');
       if (token) {
@@ -70,7 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     checkAuth();
-  }, []);
+  }, [mounted]);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
@@ -84,7 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       toast.success('Login successful!');
       return true;
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Login failed';
+      const message = error.response?.data?.message || error.message || 'Login failed';
       toast.error(message);
       return false;
     }

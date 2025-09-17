@@ -1,9 +1,10 @@
 {
-  "/buyer/dashboard/page": "app/buyer/dashboard/page.js",
   "/page": "app/page.js",
-  "/auth/register/page": "app/auth/register/page.js",
+  "/auth/login/page": "app/auth/login/page.js",
   "/farmer/dashboard/page": "app/farmer/dashboard/page.js",
   "/farmer/contracts/create/page": "app/farmer/contracts/create/page.js",
-  "/auth/login/page": "app/auth/login/page.js",
-  "/buyer/contracts/page": "app/buyer/contracts/page.js"
+  "/farmer/contracts/page": "app/farmer/contracts/page.js",
+  "/buyer/dashboard/page": "app/buyer/dashboard/page.js",
+  "/buyer/contracts/page": "app/buyer/contracts/page.js",
+  "/buyer/contracts/create/page": "app/buyer/contracts/create/page.js"
 }

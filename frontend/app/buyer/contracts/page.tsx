@@ -5,7 +5,7 @@ import Layout from '@/components/Layout';
 import Link from 'next/link';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { Search, Eye, FileSignature } from 'lucide-react';
+import { Search, Eye, FileSignature, FileText } from 'lucide-react';
 
 interface Contract {
   _id: string;
@@ -56,12 +56,18 @@ export default function BuyerContractsPage() {
   };
 
   const handleSignContract = async (contractId: string) => {
+    if (!confirm('Are you sure you want to purchase this contract? The contract amount will be deducted from your wallet.')) {
+      return;
+    }
+
     try {
-      await axios.post(`/api/contracts/sign/${contractId}`);
-      toast.success('Contract signed successfully!');
+      await axios.post(`/api/contracts/sign/${contractId}`, {
+        signatureData: 'digital_signature_placeholder' // Placeholder for now
+      });
+      toast.success('Contract purchased and signed successfully!');
       fetchContracts(); // Refresh data
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Failed to sign contract';
+      const message = error.response?.data?.message || 'Failed to purchase contract';
       toast.error(message);
     }
   };
@@ -102,6 +108,10 @@ export default function BuyerContractsPage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-900">Contracts</h1>
+          <Link href="/buyer/contracts/create" className="btn-primary flex items-center">
+            <FileText className="h-4 w-4 mr-2" />
+            Create Proposal
+          </Link>
         </div>
 
         {/* Tabs */}
@@ -189,7 +199,7 @@ export default function BuyerContractsPage() {
                         className="flex-1 btn-primary text-sm py-2 flex items-center justify-center"
                       >
                         <FileSignature className="h-4 w-4 mr-1" />
-                        Sign
+                        Buy & Sign
                       </button>
                     </div>
                   </div>

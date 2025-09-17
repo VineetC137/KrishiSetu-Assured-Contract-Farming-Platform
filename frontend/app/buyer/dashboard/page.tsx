@@ -6,6 +6,7 @@ import Layout from '@/components/Layout';
 import Link from 'next/link';
 import axios from 'axios';
 import { Search, FileText, Clock, CheckCircle, DollarSign } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 interface Contract {
   _id: string;
@@ -79,10 +80,19 @@ export default function BuyerDashboard() {
   };
 
   const handleSignContract = async (contractId: string) => {
+    if (!confirm('Are you sure you want to purchase this contract? The contract amount will be deducted from your wallet.')) {
+      return;
+    }
+
     try {
-      await axios.post(`/api/contracts/sign/${contractId}`);
+      await axios.post(`/api/contracts/sign/${contractId}`, {
+        signatureData: 'digital_signature_placeholder' // Placeholder for now
+      });
+      toast.success('Contract purchased and signed successfully!');
       fetchContracts(); // Refresh data
     } catch (error: any) {
+      const message = error.response?.data?.message || 'Failed to purchase contract';
+      toast.error(message);
       console.error('Error signing contract:', error);
     }
   };
@@ -205,7 +215,7 @@ export default function BuyerDashboard() {
                       onClick={() => handleSignContract(contract._id)}
                       className="flex-1 btn-primary text-sm py-2"
                     >
-                      Sign Contract
+                      Buy & Sign
                     </button>
                   </div>
                 </div>
