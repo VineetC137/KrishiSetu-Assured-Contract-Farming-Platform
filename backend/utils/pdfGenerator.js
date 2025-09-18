@@ -2,8 +2,8 @@ const { jsPDF } = require('jspdf');
 const path = require('path');
 const fs = require('fs');
 
-// Ensure contracts directory exists
-const contractsDir = path.join(__dirname, '../contracts');
+// Ensure contracts directory exists in public folder for serving
+const contractsDir = path.join(__dirname, '../../public/contracts');
 if (!fs.existsSync(contractsDir)) {
   fs.mkdirSync(contractsDir, { recursive: true });
 }
@@ -233,10 +233,15 @@ const generateContractPDF = async (contract, buyer, farmer) => {
     const filename = `contract-${contract._id}-${Date.now()}.pdf`;
     const filepath = path.join(contractsDir, filename);
     
-    const pdfBuffer = doc.output('arraybuffer');
-    fs.writeFileSync(filepath, Buffer.from(pdfBuffer));
-    
-    return `/contracts/${filename}`;
+    try {
+      const pdfBuffer = doc.output('arraybuffer');
+      fs.writeFileSync(filepath, Buffer.from(pdfBuffer));
+      console.log('PDF saved successfully:', filepath);
+      return `/contracts/${filename}`;
+    } catch (saveError) {
+      console.error('PDF save error:', saveError);
+      throw new Error('Failed to save PDF file');
+    }
   } catch (error) {
     console.error('PDF generation error:', error);
     throw new Error('Failed to generate contract PDF');

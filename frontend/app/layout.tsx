@@ -3,10 +3,12 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from '@/contexts/AuthContext';
-import ErrorBoundary from '@/components/ErrorBoundary';
-import NetworkStatus from '@/components/NetworkStatus';
+import { LanguageProvider } from '@/contexts/LanguageContext';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ 
+  subsets: ['latin'],
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'KrishiSetu - Contract Farming Platform',
@@ -21,10 +23,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <ErrorBoundary>
+        <LanguageProvider>
           <AuthProvider>
             {children}
-            <NetworkStatus />
             <Toaster 
               position="top-right"
               toastOptions={{
@@ -46,7 +47,7 @@ export default function RootLayout({
               }}
             />
           </AuthProvider>
-        </ErrorBoundary>
+        </LanguageProvider>
       </body>
     </html>
   );

@@ -6,7 +6,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { Sprout, Users, FileText, Wallet } from 'lucide-react';
 import Loading from '@/components/Loading';
-import ConnectionTest from '@/components/ConnectionTest';
 
 export default function HomePage() {
   const { user, loading } = useAuth();
@@ -152,8 +151,7 @@ export default function HomePage() {
         </div>
       </footer>
 
-      {/* Connection Test - Only show in development */}
-      {process.env.NODE_ENV === 'development' && <ConnectionTest />}
+
     </div>
   );
 }

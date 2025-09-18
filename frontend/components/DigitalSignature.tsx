@@ -1,5 +1,7 @@
 'use client';
 
+import { useLanguage } from '@/contexts/LanguageContext';
+
 import { useRef, useState, useEffect } from 'react';
 import { X, RotateCcw, Check } from 'lucide-react';
 

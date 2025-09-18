@@ -15,8 +15,10 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
-  credentials: true
+  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3000', 'http://127.0.0.1:3001'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -27,7 +29,7 @@ app.use((req, res, next) => {
   next();
 });
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/contracts', express.static(path.join(__dirname, 'contracts')));
+app.use('/contracts', express.static(path.join(__dirname, '../public/contracts')));
 
 // Database connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/krishisetu')
@@ -43,6 +45,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/contracts', contractRoutes);
 app.use('/api/wallet', walletRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/ai-chat', require('./routes/ai-chat'));
 app.use('/api/data', dataRoutes);
 
 // Health check

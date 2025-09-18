@@ -4,12 +4,12 @@ const messageSchema = new mongoose.Schema({
   senderId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: function() { return !this.isAIMessage; }
   },
   receiverId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: function() { return !this.isAIMessage; }
   },
   contractId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -21,7 +21,7 @@ const messageSchema = new mongoose.Schema({
   },
   messageType: {
     type: String,
-    enum: ['text', 'image', 'file', 'contract-update'],
+    enum: ['text', 'image', 'file', 'contract-update', 'ai-user', 'ai-bot'],
     default: 'text'
   },
   fileUrl: String,
@@ -29,7 +29,17 @@ const messageSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  readAt: Date
+  readAt: Date,
+  isAIMessage: {
+    type: Boolean,
+    default: false
+  },
+  aiContext: {
+    cropType: String,
+    location: String,
+    season: String,
+    userRole: String
+  }
 }, {
   timestamps: true
 });

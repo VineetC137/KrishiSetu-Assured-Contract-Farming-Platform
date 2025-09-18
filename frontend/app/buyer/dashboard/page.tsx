@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import Layout from '@/components/Layout';
 import Link from 'next/link';
 import api from '@/lib/axios';
@@ -30,6 +31,7 @@ interface Contract {
 
 export default function BuyerDashboard() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [availableContracts, setAvailableContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,10 +90,10 @@ export default function BuyerDashboard() {
       await api.post(`/contracts/sign/${contractId}`, {
         signatureData: 'digital_signature_placeholder' // Placeholder for now
       });
-      toast.success('Contract purchased and signed successfully!');
+      toast.success(t.messages.contractSigned);
       fetchContracts(); // Refresh data
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Failed to purchase contract';
+      const message = error.response?.data?.message || t.messages.operationFailed;
       toast.error(message);
       console.error('Error signing contract:', error);
     }
@@ -109,7 +111,7 @@ export default function BuyerDashboard() {
 
   if (loading) {
     return (
-      <Layout title="Buyer Dashboard">
+      <Layout title={t.dashboard.welcome}>
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600"></div>
         </div>
@@ -118,11 +120,11 @@ export default function BuyerDashboard() {
   }
 
   return (
-    <Layout title="Buyer Dashboard">
+    <Layout title={t.dashboard.welcome}>
       <div className="space-y-6">
         {/* Welcome Section */}
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white">
-          <h1 className="text-2xl font-bold mb-2">Welcome back, {user?.username}!</h1>
+          <h1 className="text-2xl font-bold mb-2">{t.dashboard.welcome}, {user?.username}!</h1>
           <p className="text-blue-100">Discover and manage your farming contracts</p>
         </div>
 
@@ -132,7 +134,7 @@ export default function BuyerDashboard() {
             <div className="flex items-center">
               <FileText className="h-8 w-8 text-blue-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Signed Contracts</p>
+                <p className="text-sm font-medium text-gray-600">{t.contracts.signed}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.signed}</p>
               </div>
             </div>
@@ -142,7 +144,7 @@ export default function BuyerDashboard() {
             <div className="flex items-center">
               <Clock className="h-8 w-8 text-purple-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">In Progress</p>
+                <p className="text-sm font-medium text-gray-600">{t.contracts.inProgress}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.inProgress}</p>
               </div>
             </div>
@@ -152,7 +154,7 @@ export default function BuyerDashboard() {
             <div className="flex items-center">
               <CheckCircle className="h-8 w-8 text-green-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Completed</p>
+                <p className="text-sm font-medium text-gray-600">{t.contracts.completed}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.completed}</p>
               </div>
             </div>

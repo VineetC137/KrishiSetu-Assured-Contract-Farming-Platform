@@ -1,5 +1,7 @@
 'use client';
 
+import { useLanguage } from '@/contexts/LanguageContext';
+
 import { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
 import Link from 'next/link';
@@ -23,6 +25,7 @@ interface Contract {
 }
 
 export default function FarmerContractsPage() {
+  const { t } = useLanguage();
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [filteredContracts, setFilteredContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,10 +70,10 @@ export default function FarmerContractsPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Pending': return 'bg-yellow-100 text-yellow-800';
-      case 'Signed': return 'bg-blue-100 text-blue-800';
+      case t.contracts.pending: return 'bg-yellow-100 text-yellow-800';
+      case t.contracts.signed: return 'bg-blue-100 text-blue-800';
       case 'In-progress': return 'bg-purple-100 text-purple-800';
-      case 'Completed': return 'bg-green-100 text-green-800';
+      case t.contracts.completed: return 'bg-green-100 text-green-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };

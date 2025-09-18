@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/contexts/LanguageContext';
 import Layout from '@/components/Layout';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
@@ -21,6 +22,7 @@ interface CropData {
 
 export default function CreateContractPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [cropData, setCropData] = useState<CropData | null>(null);
   const [formData, setFormData] = useState({
     category: 'crops',
@@ -74,10 +76,10 @@ export default function CreateContractPage() {
         price: Number(formData.price),
       });
 
-      toast.success('Contract created successfully!');
+      toast.success(t.messages.contractCreated);
       router.push('/farmer/contracts');
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Failed to create contract';
+      const message = error.response?.data?.message || t.messages.operationFailed;
       toast.error(message);
     } finally {
       setIsLoading(false);
@@ -169,10 +171,10 @@ export default function CreateContractPage() {
   };
 
   return (
-    <Layout title="Create Contract">
+    <Layout title={t.contracts.createNew}>
       <div className="max-w-2xl mx-auto">
         <div className="card">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6">Create New Contract</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-6">{t.contracts.createNew}</h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Category Selection */}

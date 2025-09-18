@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import api from '@/lib/axios';
-import { Send, X, Paperclip, Image } from 'lucide-react';
+import { Send, X, Paperclip } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface Message {
@@ -179,7 +179,7 @@ export default function ChatWindow({
         ) : (
           <div className="space-y-3">
             {messages.map((message) => {
-              const isOwn = message.senderId._id === user?.id;
+              const isOwn = message.senderId._id === user?._id;
               return (
                 <div
                   key={message._id}

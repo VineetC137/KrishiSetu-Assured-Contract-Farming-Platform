@@ -413,12 +413,50 @@ router.get('/download/:id', auth, async (req, res) => {
 
     res.json({
       message: 'PDF generated successfully',
-      downloadUrl: `/api/contracts/pdf/${contract._id}`,
+      downloadUrl: `http://localhost:5000${pdfPath}`,
       contractFile: pdfPath
     });
   } catch (error) {
     console.error('PDF download error:', error);
     res.status(500).json({ message: 'Server error generating PDF' });
+  }
+});
+
+// Serve PDF files directly
+router.get('/pdf/:id', auth, async (req, res) => {
+  try {
+    const contract = await Contract.findById(req.params.id);
+    
+    if (!contract) {
+      return res.status(404).json({ message: 'Contract not found' });
+    }
+
+    // Check if user has access to this contract
+    const hasAccess = contract.farmerId.toString() === req.user._id.toString() ||
+                     (contract.buyerId && contract.buyerId.toString() === req.user._id.toString());
+
+    if (!hasAccess) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    if (!contract.contractFile) {
+      return res.status(404).json({ message: 'PDF not found' });
+    }
+
+    const filePath = path.join(__dirname, '../../public', contract.contractFile);
+    
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ message: 'PDF file not found on server' });
+    }
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="contract-${contract._id}.pdf"`);
+    
+    const fileStream = fs.createReadStream(filePath);
+    fileStream.pipe(res);
+  } catch (error) {
+    console.error('PDF serve error:', error);
+    res.status(500).json({ message: 'Server error serving PDF' });
   }
 });
 

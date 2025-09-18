@@ -9,10 +9,19 @@
     "frontend": "cd frontend && npm run dev",
     "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install"
   },
-  "keywords": ["farming", "contracts", "agriculture"],
+  "keywords": [
+    "farming",
+    "contracts",
+    "agriculture"
+  ],
   "author": "KrishiSetu Team",
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "axios": "^1.12.2",
+    "dotenv": "^17.2.2"
   }
 }

@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import LanguageSelector from '@/components/LanguageSelector';
 import { Sprout, Eye, EyeOff } from 'lucide-react';
 
 export default function RegisterPage() {
@@ -21,13 +23,14 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const { register } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match');
+      alert(t.forms.passwordMismatch);
       return;
     }
 
@@ -57,17 +60,22 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
+        {/* Language Selector */}
+        <div className="flex justify-end">
+          <LanguageSelector />
+        </div>
+        
         <div>
           <div className="flex justify-center">
             <Sprout className="h-12 w-12 text-primary-600" />
           </div>
           <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-            Join KrishiSetu
+            {t.auth.registerTitle}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
+            {t.auth.alreadyHaveAccount}{' '}
             <Link href="/auth/login" className="font-medium text-primary-600 hover:text-primary-500">
-              sign in to your account
+              {t.auth.login}
             </Link>
           </p>
         </div>
@@ -76,7 +84,7 @@ export default function RegisterPage() {
           <div className="space-y-4">
             <div>
               <label htmlFor="role" className="label">
-                I am a
+                {t.auth.role}
               </label>
               <select
                 id="role"
@@ -86,14 +94,14 @@ export default function RegisterPage() {
                 value={formData.role}
                 onChange={handleChange}
               >
-                <option value="farmer">Farmer</option>
-                <option value="buyer">Buyer</option>
+                <option value="farmer">{t.auth.farmer}</option>
+                <option value="buyer">{t.auth.buyer}</option>
               </select>
             </div>
 
             <div>
               <label htmlFor="username" className="label">
-                Username
+                {t.auth.username}
               </label>
               <input
                 id="username"
@@ -109,7 +117,7 @@ export default function RegisterPage() {
 
             <div>
               <label htmlFor="email" className="label">
-                Email address
+                {t.auth.email}
               </label>
               <input
                 id="email"
@@ -126,7 +134,7 @@ export default function RegisterPage() {
 
             <div>
               <label htmlFor="password" className="label">
-                Password
+                {t.auth.password}
               </label>
               <div className="relative">
                 <input
@@ -157,7 +165,7 @@ export default function RegisterPage() {
 
             <div>
               <label htmlFor="confirmPassword" className="label">
-                Confirm Password
+                {t.auth.confirmPassword}
               </label>
               <input
                 id="confirmPassword"
@@ -179,7 +187,7 @@ export default function RegisterPage() {
               disabled={isLoading}
               className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Creating account...' : 'Create account'}
+              {isLoading ? 'Creating account...' : t.auth.registerButton}
             </button>
           </div>
         </form>

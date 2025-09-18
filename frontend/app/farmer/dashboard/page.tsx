@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import Layout from '@/components/Layout';
 import Link from 'next/link';
 import api from '@/lib/axios';
@@ -25,6 +26,7 @@ interface Contract {
 
 export default function FarmerDashboard() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -88,7 +90,7 @@ export default function FarmerDashboard() {
 
   if (loading) {
     return (
-      <Layout title="Farmer Dashboard">
+      <Layout title={t.dashboard.welcome}>
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600"></div>
         </div>
@@ -97,13 +99,13 @@ export default function FarmerDashboard() {
   }
 
   return (
-    <Layout title="Farmer Dashboard">
+    <Layout title={t.dashboard.welcome}>
       <div className="space-y-6">
         {/* Welcome Section */}
         <div className="bg-gradient-to-r from-primary-500 via-primary-600 to-green-600 rounded-2xl p-8 text-white shadow-2xl animate-slide-up">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold mb-3">🌾 Welcome back, {user?.username}!</h1>
+              <h1 className="text-3xl font-bold mb-3">🌾 {t.dashboard.welcome}, {user?.username}!</h1>
               <p className="text-primary-100 text-lg">Manage your contracts and track your farming progress</p>
             </div>
             <div className="hidden md:block">
@@ -122,7 +124,7 @@ export default function FarmerDashboard() {
                 <FileText className="h-8 w-8 text-white" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-semibold text-gray-600">Total Contracts</p>
+                <p className="text-sm font-semibold text-gray-600">{t.dashboard.totalContracts}</p>
                 <p className="text-3xl font-bold text-gray-900">{stats.total}</p>
               </div>
             </div>
@@ -134,7 +136,7 @@ export default function FarmerDashboard() {
                 <Clock className="h-8 w-8 text-white" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-semibold text-gray-600">Pending</p>
+                <p className="text-sm font-semibold text-gray-600">{t.contracts.pending}</p>
                 <p className="text-3xl font-bold text-gray-900">{stats.pending}</p>
               </div>
             </div>
@@ -146,7 +148,7 @@ export default function FarmerDashboard() {
                 <CheckCircle className="h-8 w-8 text-white" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-semibold text-gray-600">Active</p>
+                <p className="text-sm font-semibold text-gray-600">{t.dashboard.activeContracts}</p>
                 <p className="text-3xl font-bold text-gray-900">{stats.signed}</p>
               </div>
             </div>
@@ -158,7 +160,7 @@ export default function FarmerDashboard() {
                 <DollarSign className="h-8 w-8 text-white" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-semibold text-gray-600">Total Earnings</p>
+                <p className="text-sm font-semibold text-gray-600">{t.dashboard.totalEarnings}</p>
                 <p className="text-3xl font-bold text-gray-900">₹{stats.totalEarnings.toLocaleString()}</p>
               </div>
             </div>
@@ -167,17 +169,17 @@ export default function FarmerDashboard() {
 
         {/* Quick Actions */}
         <div className="card">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t.dashboard.quickActions}</h2>
           <div className="flex flex-wrap gap-4">
             <Link href="/farmer/contracts/create" className="btn-primary flex items-center">
               <Plus className="h-4 w-4 mr-2" />
-              Create New Contract
+              {t.dashboard.createContract}
             </Link>
             <Link href="/farmer/contracts" className="btn-secondary">
-              View All Contracts
+              {t.dashboard.viewContracts}
             </Link>
             <Link href="/farmer/wallet" className="btn-secondary">
-              Manage Wallet
+              {t.dashboard.manageWallet}
             </Link>
           </div>
         </div>
@@ -185,18 +187,18 @@ export default function FarmerDashboard() {
         {/* Recent Contracts */}
         <div className="card">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-semibold text-gray-900">Recent Contracts</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t.dashboard.recentContracts}</h2>
             <Link href="/farmer/contracts" className="text-primary-600 hover:text-primary-700 text-sm font-medium">
-              View all
+              {t.common.view} {t.common.all}
             </Link>
           </div>
 
           {contracts.length === 0 ? (
             <div className="text-center py-8">
               <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 mb-4">No contracts yet</p>
+              <p className="text-gray-500 mb-4">{t.dashboard.noContracts}</p>
               <Link href="/farmer/contracts/create" className="btn-primary">
-                Create Your First Contract
+                {t.dashboard.createContract}
               </Link>
             </div>
           ) : (
@@ -205,22 +207,22 @@ export default function FarmerDashboard() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Crop
+                      {t.contracts.cropType}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Quantity
+                      {t.contracts.quantity}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Value
+                      {t.contracts.totalValue}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
+                      {t.contracts.status}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Buyer
+                      {t.contracts.buyer}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
+                      {t.common.actions}
                     </th>
                   </tr>
                 </thead>
@@ -249,7 +251,7 @@ export default function FarmerDashboard() {
                           href={`/farmer/contracts/${contract._id}`}
                           className="text-primary-600 hover:text-primary-900"
                         >
-                          View
+                          {t.common.view}
                         </Link>
                       </td>
                     </tr>

@@ -1,8 +1,11 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import LanguageSelector from '@/components/LanguageSelector';
+import AIChatbot from '@/components/AIChatbot';
 import { Sprout, LogOut, User, Wallet } from 'lucide-react';
 
 interface LayoutProps {
@@ -12,6 +15,7 @@ interface LayoutProps {
 
 export default function Layout({ children, title }: LayoutProps) {
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
 
   const handleLogout = () => {
@@ -51,6 +55,9 @@ export default function Layout({ children, title }: LayoutProps) {
             </div>
 
             <div className="flex items-center space-x-4">
+              {/* Language Selector */}
+              <LanguageSelector showLabel={false} />
+
               {/* Wallet Balance */}
               <div className="flex items-center bg-gradient-to-r from-primary-50 to-green-50 px-4 py-2 rounded-xl border border-primary-200 shadow-sm">
                 <Wallet className="h-5 w-5 text-primary-600 mr-2" />
@@ -91,7 +98,7 @@ export default function Layout({ children, title }: LayoutProps) {
                   className="flex items-center text-gray-600 hover:text-red-600 px-4 py-2 rounded-xl hover:bg-red-50 transition-all duration-200 border border-gray-200 hover:border-red-200"
                 >
                   <LogOut className="h-4 w-4 mr-2" />
-                  <span className="text-sm font-medium">Logout</span>
+                  <span className="text-sm font-medium">{t.nav.logout}</span>
                 </button>
               </div>
             </div>
@@ -107,25 +114,25 @@ export default function Layout({ children, title }: LayoutProps) {
               href={`/${user.role}/dashboard`}
               className="border-b-3 border-primary-500 text-primary-600 py-4 px-2 text-sm font-semibold bg-primary-50 rounded-t-lg"
             >
-              📊 Dashboard
+              📊 {t.nav.dashboard}
             </Link>
             <Link
               href={`/${user.role}/contracts`}
               className="border-b-3 border-transparent text-gray-600 hover:text-primary-600 hover:border-primary-300 py-4 px-2 text-sm font-semibold transition-all duration-200 hover:bg-primary-50 rounded-t-lg"
             >
-              📋 Contracts
+              📋 {t.nav.contracts}
             </Link>
             <Link
               href={`/${user.role}/wallet`}
               className="border-b-3 border-transparent text-gray-600 hover:text-primary-600 hover:border-primary-300 py-4 px-2 text-sm font-semibold transition-all duration-200 hover:bg-primary-50 rounded-t-lg"
             >
-              💰 Wallet
+              💰 {t.nav.wallet}
             </Link>
             <Link
               href="/profile"
               className="border-b-3 border-transparent text-gray-600 hover:text-primary-600 hover:border-primary-300 py-4 px-2 text-sm font-semibold transition-all duration-200 hover:bg-primary-50 rounded-t-lg"
             >
-              👤 Profile
+              👤 {t.nav.profile}
             </Link>
           </div>
         </div>
@@ -135,6 +142,9 @@ export default function Layout({ children, title }: LayoutProps) {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
         {children}
       </main>
+
+      {/* AI Chatbot */}
+      <AIChatbot />
     </div>
   );
 }
