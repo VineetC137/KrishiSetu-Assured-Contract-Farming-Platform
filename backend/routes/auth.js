@@ -2,6 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { auth } = require('../middleware/auth');
+const upload = require('../middleware/upload');
 
 const router = express.Router();
 
@@ -105,6 +106,81 @@ router.get('/me', auth, async (req, res) => {
   } catch (error) {
     console.error('Get user error:', error);
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Update user profile
+router.put('/profile', auth, async (req, res) => {
+  try {
+    const {
+      fullName,
+      phone,
+      address,
+      farmSize,
+      businessType,
+      state,
+      district,
+      pincode
+    } = req.body;
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Update profile fields
+    user.profile = {
+      ...user.profile,
+      fullName: fullName || user.profile?.fullName,
+      phone: phone || user.profile?.phone,
+      address: address || user.profile?.address,
+      farmSize: farmSize || user.profile?.farmSize,
+      businessType: businessType || user.profile?.businessType,
+      state: state || user.profile?.state,
+      district: district || user.profile?.district,
+      pincode: pincode || user.profile?.pincode
+    };
+
+    await user.save();
+
+    const updatedUser = await User.findById(req.user._id).select('-password');
+    res.json({
+      message: 'Profile updated successfully',
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ message: 'Server error updating profile' });
+  }
+});
+
+// Upload profile photo
+router.post('/profile/photo', auth, upload.single('profilePhoto'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Update profile image path
+    user.profile = {
+      ...user.profile,
+      profileImage: `/uploads/${req.file.filename}`
+    };
+
+    await user.save();
+
+    res.json({
+      message: 'Profile photo uploaded successfully',
+      profileImage: user.profile.profileImage
+    });
+  } catch (error) {
+    console.error('Upload profile photo error:', error);
+    res.status(500).json({ message: 'Server error uploading photo' });
   }
 });
 

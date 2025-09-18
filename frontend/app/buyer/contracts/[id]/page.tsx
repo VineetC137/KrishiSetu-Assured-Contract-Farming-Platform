@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Layout from '@/components/Layout';
-import axios from 'axios';
+import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import { Calendar, User, Package, DollarSign, FileText, CheckCircle, FileSignature } from 'lucide-react';
+import PDFDownload from '@/components/PDFDownload';
 
 interface Contract {
   _id: string;
@@ -49,7 +50,7 @@ export default function BuyerContractDetailsPage() {
 
   const fetchContract = async () => {
     try {
-      const response = await axios.get(`/api/contracts/${params.id}`);
+      const response = await api.get(`/contracts/${params.id}`);
       setContract(response.data);
     } catch (error) {
       console.error('Error fetching contract:', error);
@@ -66,7 +67,7 @@ export default function BuyerContractDetailsPage() {
     }
 
     try {
-      await axios.post(`/api/contracts/sign/${params.id}`);
+      await api.post(`/contracts/sign/${params.id}`);
       toast.success('Contract signed successfully!');
       fetchContract(); // Refresh contract data
     } catch (error: any) {
@@ -258,29 +259,25 @@ export default function BuyerContractDetailsPage() {
           <p className="text-gray-700 whitespace-pre-wrap">{contract.terms}</p>
         </div>
 
-        {/* Contract File */}
-        {contract.contractFile && (
-          <div className="card">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Contract Document</h2>
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-center">
-                <FileText className="h-8 w-8 text-red-600 mr-3" />
-                <div>
-                  <p className="font-medium text-gray-900">Signed Contract</p>
-                  <p className="text-sm text-gray-600">PDF Document</p>
-                </div>
+        {/* Contract Document */}
+        <div className="card">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Contract Document</h2>
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-center">
+              <FileText className="h-8 w-8 text-red-600 mr-3" />
+              <div>
+                <p className="font-medium text-gray-900">Contract PDF</p>
+                <p className="text-sm text-gray-600">
+                  {contract.contractFile ? 'Signed contract document' : 'Generate contract document'}
+                </p>
               </div>
-              <a
-                href={`http://localhost:5000${contract.contractFile}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-secondary"
-              >
-                Download PDF
-              </a>
             </div>
+            <PDFDownload 
+              contractId={contract._id} 
+              contractTitle={`${contract.cropType} Contract`}
+            />
           </div>
-        )}
+        </div>
       </div>
     </Layout>
   );

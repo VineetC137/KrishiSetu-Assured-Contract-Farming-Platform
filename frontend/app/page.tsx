@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { Sprout, Users, FileText, Wallet } from 'lucide-react';
+import Loading from '@/components/Loading';
+import ConnectionTest from '@/components/ConnectionTest';
 
 export default function HomePage() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -16,10 +18,12 @@ export default function HomePage() {
     }
   }, [user, router]);
 
+  if (loading) {
+    return <Loading message="Loading KrishiSetu..." fullScreen />;
+  }
+
   if (user) {
-    return <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600"></div>
-    </div>;
+    return <Loading message="Redirecting to dashboard..." fullScreen />;
   }
 
   return (
@@ -147,6 +151,9 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+
+      {/* Connection Test - Only show in development */}
+      {process.env.NODE_ENV === 'development' && <ConnectionTest />}
     </div>
   );
 }

@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Layout from '@/components/Layout';
-import axios from 'axios';
+import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import { Calendar, User, Package, DollarSign, FileText, Camera, CheckCircle } from 'lucide-react';
+import PDFDownload from '@/components/PDFDownload';
 
 interface Contract {
   _id: string;
@@ -54,7 +55,7 @@ export default function ContractDetailsPage() {
 
   const fetchContract = async () => {
     try {
-      const response = await axios.get(`/api/contracts/${params.id}`);
+      const response = await api.get(`/contracts/${params.id}`);
       setContract(response.data);
     } catch (error) {
       console.error('Error fetching contract:', error);
@@ -77,7 +78,7 @@ export default function ContractDetailsPage() {
     }
 
     try {
-      await axios.post(`/api/contracts/milestone/${params.id}`, formData, {
+      await api.post(`/contracts/milestone/${params.id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
@@ -98,7 +99,7 @@ export default function ContractDetailsPage() {
     }
 
     try {
-      await axios.post(`/api/contracts/complete/${params.id}`);
+      await api.post(`/contracts/complete/${params.id}`);
       toast.success('Contract completed and payment released!');
       fetchContract();
     } catch (error: any) {
@@ -280,6 +281,26 @@ export default function ContractDetailsPage() {
             </p>
           </div>
         )}
+
+        {/* Contract Document */}
+        <div className="card">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Contract Document</h2>
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-center">
+              <FileText className="h-8 w-8 text-red-600 mr-3" />
+              <div>
+                <p className="font-medium text-gray-900">Contract PDF</p>
+                <p className="text-sm text-gray-600">
+                  {contract.contractFile ? 'Signed contract document' : 'Generate contract document'}
+                </p>
+              </div>
+            </div>
+            <PDFDownload 
+              contractId={contract._id} 
+              contractTitle={`${contract.cropType} Contract`}
+            />
+          </div>
+        </div>
 
         {/* Contract Terms */}
         <div className="card">

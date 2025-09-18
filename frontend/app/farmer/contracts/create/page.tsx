@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Layout from '@/components/Layout';
-import axios from 'axios';
+import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 
 interface CropData {
@@ -56,7 +56,7 @@ export default function CreateContractPage() {
 
   const fetchCropData = async () => {
     try {
-      const response = await axios.get('/api/data/crops');
+      const response = await api.get('/data/crops');
       setCropData(response.data);
     } catch (error) {
       console.error('Error fetching crop data:', error);
@@ -68,7 +68,7 @@ export default function CreateContractPage() {
     setIsLoading(true);
 
     try {
-      await axios.post('/api/contracts/create', {
+      await api.post('/contracts/create', {
         ...formData,
         quantity: Number(formData.quantity),
         price: Number(formData.price),

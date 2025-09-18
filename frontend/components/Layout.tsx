@@ -61,10 +61,21 @@ export default function Layout({ children, title }: LayoutProps) {
 
               {/* User Menu */}
               <div className="flex items-center space-x-3">
-                <div className="flex items-center bg-white px-4 py-2 rounded-xl shadow-md border border-gray-100">
-                  <User className="h-5 w-5 text-gray-600 mr-2" />
+                <Link
+                  href="/profile"
+                  className="flex items-center bg-white px-4 py-2 rounded-xl shadow-md border border-gray-100 hover:bg-gray-50 transition-colors"
+                >
+                  {user.profile?.profileImage ? (
+                    <img
+                      src={`http://localhost:5000${user.profile.profileImage}`}
+                      alt="Profile"
+                      className="h-6 w-6 rounded-full object-cover mr-2"
+                    />
+                  ) : (
+                    <User className="h-5 w-5 text-gray-600 mr-2" />
+                  )}
                   <span className="text-sm font-semibold text-gray-700">
-                    {user.username}
+                    {user.profile?.fullName || user.username}
                   </span>
                   <span className={`ml-2 text-xs px-3 py-1 rounded-full font-medium ${
                     user.role === 'farmer' 
@@ -73,7 +84,7 @@ export default function Layout({ children, title }: LayoutProps) {
                   }`}>
                     {user.role}
                   </span>
-                </div>
+                </Link>
                 
                 <button
                   onClick={handleLogout}
@@ -109,6 +120,12 @@ export default function Layout({ children, title }: LayoutProps) {
               className="border-b-3 border-transparent text-gray-600 hover:text-primary-600 hover:border-primary-300 py-4 px-2 text-sm font-semibold transition-all duration-200 hover:bg-primary-50 rounded-t-lg"
             >
               💰 Wallet
+            </Link>
+            <Link
+              href="/profile"
+              className="border-b-3 border-transparent text-gray-600 hover:text-primary-600 hover:border-primary-300 py-4 px-2 text-sm font-semibold transition-all duration-200 hover:bg-primary-50 rounded-t-lg"
+            >
+              👤 Profile
             </Link>
           </div>
         </div>

@@ -21,12 +21,20 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    const success = await login(formData.email, formData.password);
-    if (success) {
-      router.push('/');
+    try {
+      console.log('Attempting login...');
+      const success = await login(formData.email, formData.password);
+      if (success) {
+        console.log('Login successful, redirecting...');
+        router.push('/');
+      } else {
+        console.log('Login failed');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

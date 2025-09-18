@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
 import Link from 'next/link';
-import axios from 'axios';
+import api from '@/lib/axios';
 import { Plus, Search, Filter } from 'lucide-react';
 
 interface Contract {
@@ -39,7 +39,7 @@ export default function FarmerContractsPage() {
 
   const fetchContracts = async () => {
     try {
-      const response = await axios.get('/api/contracts/my-contracts');
+      const response = await api.get('/contracts/my-contracts');
       setContracts(response.data);
     } catch (error) {
       console.error('Error fetching contracts:', error);

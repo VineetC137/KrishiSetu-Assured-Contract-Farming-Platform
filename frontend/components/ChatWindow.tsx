@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import axios from 'axios';
+import api from '@/lib/axios';
 import { Send, X, Paperclip, Image } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -33,12 +33,12 @@ interface ChatWindowProps {
   contractId?: string;
 }
 
-export default function ChatWindow({ 
-  isOpen, 
-  onClose, 
-  participantId, 
-  participantName, 
-  contractId 
+export default function ChatWindow({
+  isOpen,
+  onClose,
+  participantId,
+  participantName,
+  contractId
 }: ChatWindowProps) {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -68,13 +68,13 @@ export default function ChatWindow({
     setLoading(true);
     try {
       // Create or get chat room first
-      await axios.post('/api/chat/room', {
+      await api.post('/chat/room', {
         participantId,
         contractId
       });
 
       // Then fetch messages
-      const response = await axios.get(`/api/chat/room/messages`, {
+      const response = await api.get(`/chat/room/messages`, {
         params: { participantId, contractId }
       });
       setMessages(response.data);
@@ -87,7 +87,7 @@ export default function ChatWindow({
 
   const markMessagesAsRead = async () => {
     try {
-      await axios.put('/api/chat/messages/read', {
+      await api.put('/chat/messages/read', {
         senderId: participantId
       });
     } catch (error) {
@@ -101,7 +101,7 @@ export default function ChatWindow({
 
     setSending(true);
     try {
-      const response = await axios.post('/api/chat/message', {
+      const response = await api.post('/chat/message', {
         receiverId: participantId,
         contractId,
         message: newMessage,
@@ -131,7 +131,7 @@ export default function ChatWindow({
 
     setSending(true);
     try {
-      const response = await axios.post('/api/chat/message', formData, {
+      const response = await api.post('/chat/message', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
@@ -145,9 +145,9 @@ export default function ChatWindow({
   };
 
   const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return new Date(dateString).toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
@@ -186,11 +186,10 @@ export default function ChatWindow({
                   className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-xs px-3 py-2 rounded-lg ${
-                      isOwn
-                        ? 'bg-primary-600 text-white'
-                        : 'bg-gray-100 text-gray-900'
-                    }`}
+                    className={`max-w-xs px-3 py-2 rounded-lg ${isOwn
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-gray-100 text-gray-900'
+                      }`}
                   >
                     {message.messageType === 'image' && message.fileUrl && (
                       <img
@@ -201,9 +200,8 @@ export default function ChatWindow({
                     )}
                     <p className="text-sm">{message.message}</p>
                     <p
-                      className={`text-xs mt-1 ${
-                        isOwn ? 'text-primary-100' : 'text-gray-500'
-                      }`}
+                      className={`text-xs mt-1 ${isOwn ? 'text-primary-100' : 'text-gray-500'
+                        }`}
                     >
                       {formatTime(message.createdAt)}
                     </p>
@@ -226,7 +224,7 @@ export default function ChatWindow({
             accept="image/*,.pdf,.doc,.docx"
             className="hidden"
           />
-          
+
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}

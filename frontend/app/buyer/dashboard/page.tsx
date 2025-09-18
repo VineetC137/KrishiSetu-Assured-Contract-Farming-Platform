@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Layout from '@/components/Layout';
 import Link from 'next/link';
-import axios from 'axios';
+import api from '@/lib/axios';
 import { Search, FileText, Clock, CheckCircle, DollarSign } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -46,7 +46,7 @@ export default function BuyerDashboard() {
 
   const fetchContracts = async () => {
     try {
-      const response = await axios.get('/api/contracts/my-contracts');
+      const response = await api.get('/contracts/my-contracts');
       const contractsData = response.data;
       
       const myContracts = contractsData.filter((c: Contract) => c.buyerId);
@@ -85,7 +85,7 @@ export default function BuyerDashboard() {
     }
 
     try {
-      await axios.post(`/api/contracts/sign/${contractId}`, {
+      await api.post(`/contracts/sign/${contractId}`, {
         signatureData: 'digital_signature_placeholder' // Placeholder for now
       });
       toast.success('Contract purchased and signed successfully!');

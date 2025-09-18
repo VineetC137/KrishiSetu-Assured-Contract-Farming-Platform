@@ -1,16 +1,28 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '@/lib/axios';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 
 interface User {
-  id: string;
+  _id: string;
   username: string;
   email: string;
   role: 'farmer' | 'buyer';
   walletBalance: number;
+  createdAt: string;
+  profile?: {
+    fullName?: string;
+    phone?: string;
+    address?: string;
+    farmSize?: string;
+    businessType?: string;
+    state?: string;
+    district?: string;
+    pincode?: string;
+    profileImage?: string;
+  };
 }
 
 interface AuthContextType {
@@ -50,14 +62,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setMounted(true);
   }, []);
 
-  // Set up axios defaults
+  // Set up authentication
   useEffect(() => {
     if (!mounted) return;
     
-    // Don't set base URL, let Next.js rewrites handle it
     const token = Cookies.get('token');
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      console.log('🔑 Token found and will be set in headers by axios interceptor');
     }
   }, [mounted]);
 
@@ -69,32 +80,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const token = Cookies.get('token');
       if (token) {
         try {
-          const response = await axios.get('/api/auth/me');
+          console.log('Checking auth with token:', token);
+          const response = await api.get('/auth/me');
+          console.log('Auth check response:', response.data);
           setUser(response.data);
         } catch (error) {
           console.error('Auth check failed:', error);
           Cookies.remove('token');
-          delete axios.defaults.headers.common['Authorization'];
         }
       }
       setLoading(false);
     };
 
-    checkAuth();
+    // Add a small delay to ensure the API is ready
+    setTimeout(checkAuth, 100);
   }, [mounted]);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const response = await axios.post('/api/auth/login', { email, password });
+      console.log('Attempting login with:', { email });
+      const response = await api.post('/auth/login', { email, password });
+      console.log('Login response:', response.data);
+      
       const { token, user: userData } = response.data;
 
       Cookies.set('token', token, { expires: 7 });
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setUser(userData);
       
       toast.success('Login successful!');
       return true;
     } catch (error: any) {
+      console.error('Login error:', error);
       const message = error.response?.data?.message || error.message || 'Login failed';
       toast.error(message);
       return false;
@@ -103,16 +119,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (userData: RegisterData): Promise<boolean> => {
     try {
-      const response = await axios.post('/api/auth/register', userData);
+      console.log('Attempting registration with:', userData);
+      const response = await api.post('/auth/register', userData);
+      console.log('Registration response:', response.data);
+      
       const { token, user: newUser } = response.data;
 
       Cookies.set('token', token, { expires: 7 });
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setUser(newUser);
       
       toast.success('Registration successful!');
       return true;
     } catch (error: any) {
+      console.error('Registration error:', error);
       const message = error.response?.data?.message || 'Registration failed';
       toast.error(message);
       return false;
@@ -121,7 +140,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     Cookies.remove('token');
-    delete axios.defaults.headers.common['Authorization'];
     setUser(null);
     toast.success('Logged out successfully');
   };

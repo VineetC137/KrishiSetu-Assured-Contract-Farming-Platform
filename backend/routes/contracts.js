@@ -1,4 +1,6 @@
 const express = require('express');
+const path = require('path');
+const fs = require('fs');
 const Contract = require('../models/Contract');
 const User = require('../models/User');
 const Transaction = require('../models/Transaction');
@@ -341,6 +343,82 @@ router.post('/complete/:id', auth, authorize('farmer'), async (req, res) => {
   } catch (error) {
     console.error('Complete contract error:', error);
     res.status(500).json({ message: 'Server error completing contract' });
+  }
+});
+
+// Generate PDF contract
+router.get('/pdf/:id', auth, async (req, res) => {
+  try {
+    const contract = await Contract.findById(req.params.id)
+      .populate('farmerId', 'username email profile')
+      .populate('buyerId', 'username email profile');
+
+    if (!contract) {
+      return res.status(404).json({ message: 'Contract not found' });
+    }
+
+    // Check if user has access to this contract
+    const hasAccess = contract.farmerId._id.toString() === req.user._id.toString() ||
+                     (contract.buyerId && contract.buyerId._id.toString() === req.user._id.toString());
+
+    if (!hasAccess) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    // Generate PDF if not already generated or if contract has been updated
+    if (!contract.contractFile || contract.status === 'Signed') {
+      const pdfPath = await generateContractPDF(contract, contract.buyerId, contract.farmerId);
+      contract.contractFile = pdfPath;
+      await contract.save();
+    }
+
+    // Send PDF file
+    const filepath = path.join(__dirname, '..', contract.contractFile);
+    if (fs.existsSync(filepath)) {
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="contract-${contract._id}.pdf"`);
+      res.sendFile(filepath);
+    } else {
+      res.status(404).json({ message: 'PDF file not found' });
+    }
+  } catch (error) {
+    console.error('PDF generation error:', error);
+    res.status(500).json({ message: 'Server error generating PDF' });
+  }
+});
+
+// Download contract PDF
+router.get('/download/:id', auth, async (req, res) => {
+  try {
+    const contract = await Contract.findById(req.params.id)
+      .populate('farmerId', 'username email profile')
+      .populate('buyerId', 'username email profile');
+
+    if (!contract) {
+      return res.status(404).json({ message: 'Contract not found' });
+    }
+
+    // Check if user has access to this contract
+    const hasAccess = contract.farmerId._id.toString() === req.user._id.toString() ||
+                     (contract.buyerId && contract.buyerId._id.toString() === req.user._id.toString());
+
+    if (!hasAccess) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    // Generate fresh PDF
+    const pdfPath = await generateContractPDF(contract, contract.buyerId, contract.farmerId);
+    contract.contractFile = pdfPath;
+    await contract.save();
+
+    res.json({
+      message: 'PDF generated successfully',
+      downloadUrl: `/api/contracts/pdf/${contract._id}`,
+      contractFile: pdfPath
+    });
+  } catch (error) {
+    console.error('PDF download error:', error);
+    res.status(500).json({ message: 'Server error generating PDF' });
   }
 });
 

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Layout from '@/components/Layout';
-import axios from 'axios';
+import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 
 export default function BuyerCreateContractPage() {
@@ -52,18 +52,32 @@ export default function BuyerCreateContractPage() {
     setIsLoading(true);
 
     try {
-      await axios.post('/api/contracts/create', {
+      console.log('Submitting buyer contract proposal:', formData);
+      
+      const contractData = {
         ...formData,
         quantity: Number(formData.quantity),
         price: Number(formData.price),
-      });
+        proposedBy: 'buyer' // Explicitly set this
+      };
 
+      console.log('Contract data being sent:', contractData);
+
+      const response = await api.post('/contracts/create', contractData);
+      
+      console.log('Contract creation response:', response.data);
       toast.success('Contract proposal created successfully!');
       router.push('/buyer/contracts');
     } catch (error: any) {
+      console.error('Create contract error:', error);
       const message = error.response?.data?.message || 'Failed to create contract proposal';
       toast.error(message);
-      console.error('Create contract error:', error);
+      
+      // Log detailed error information
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        console.error('Error status:', error.response.status);
+      }
     } finally {
       setIsLoading(false);
     }

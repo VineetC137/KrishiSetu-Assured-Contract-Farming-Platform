@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Layout from '@/components/Layout';
-import axios from 'axios';
+import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import { Wallet, Plus, ArrowUpRight, ArrowDownLeft, Clock } from 'lucide-react';
 
@@ -36,7 +36,7 @@ export default function BuyerWalletPage() {
 
   const fetchTransactions = async () => {
     try {
-      const response = await axios.get('/api/wallet/transactions');
+      const response = await api.get('/wallet/transactions');
       setTransactions(response.data);
     } catch (error) {
       console.error('Error fetching transactions:', error);
@@ -47,7 +47,7 @@ export default function BuyerWalletPage() {
 
   const fetchBalance = async () => {
     try {
-      const response = await axios.get('/api/wallet/balance');
+      const response = await api.get('/wallet/balance');
       updateUser({ walletBalance: response.data.balance });
     } catch (error) {
       console.error('Error fetching balance:', error);
@@ -70,7 +70,7 @@ export default function BuyerWalletPage() {
 
     setIsFunding(true);
     try {
-      const response = await axios.post('/api/wallet/fund', { amount });
+      const response = await api.post('/wallet/fund', { amount });
       updateUser({ walletBalance: response.data.newBalance });
       setFundAmount('');
       toast.success(`₹${amount.toLocaleString()} added to your wallet!`);

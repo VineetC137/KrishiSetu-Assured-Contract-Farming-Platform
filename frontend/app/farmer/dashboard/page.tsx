@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Layout from '@/components/Layout';
 import Link from 'next/link';
-import axios from 'axios';
+import api from '@/lib/axios';
 import { Plus, FileText, Clock, CheckCircle, DollarSign } from 'lucide-react';
 
 interface Contract {
@@ -41,7 +41,7 @@ export default function FarmerDashboard() {
 
   const fetchContracts = async () => {
     try {
-      const response = await axios.get('/api/contracts/my-contracts');
+      const response = await api.get('/contracts/my-contracts');
       const contractsData = response.data;
       setContracts(contractsData);
 
